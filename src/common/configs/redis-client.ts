@@ -9,8 +9,11 @@ bluebird.promisifyAll(redis);
 const clientConfig:any = {
   host: AppConfig.REDIS_HOST,
   port: AppConfig.REDIS_PORT,
-//   db: "1"
 };
+
+if (AppConfig.REDIS_URL && AppConfig.REDIS_URL.length > 0 && AppConfig.REDIS_URL !== null) {
+  clientConfig.url = AppConfig.REDIS_URL;
+}
 
 if (AppConfig.REDIS_PASSWORD && AppConfig.REDIS_PASSWORD.length > 0 && AppConfig.REDIS_PASSWORD !== null) {
   clientConfig.password = AppConfig.REDIS_PASSWORD;
