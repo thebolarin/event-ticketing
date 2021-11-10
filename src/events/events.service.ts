@@ -7,7 +7,11 @@ import { CreateEventDto, UpdateEventDto, UpdateEventStatusDto, UpdateEventTypeDt
 import slugify from 'slugify'
 import * as moment from 'moment';
 import { S3Service } from '../common/services/s3.service';
+import redis from '../common/configs/redis-client';
+import redisKeys from '../common/configs/redis-key-gen';
+const { promisify } = require('util');
 
+const client = redis.getClient();
 
 @Injectable()
 export class EventService {
@@ -27,40 +31,68 @@ export class EventService {
 
             let query: any = {};
 
-           
-            if(queryString.title && queryString.title != '') query.title = queryString.title;
-            if(queryString.type && queryString.type != '' && ["FREE", "PAID"].indexOf(queryString.type) >= 0) query.eventType = queryString.type;
-            if(queryString.status && queryString.status != '' && ["ACTIVE", "INACTIVE"].indexOf(queryString.status) >= 0) query.status = queryString.status;
 
-            // if (queryString.fromDate && queryString.toDate != '' && queryString.toDate && queryString.toDate != '') {
-            //     query.date =  {
-            //             $gte: moment(queryString.fromDate).startOf('day').format('X'),
-            //             $lt: moment(queryString.toDate).endOf('day').format('X')
-            //         }
-            // }
+            if (queryString.title && queryString.title != '') query.title = queryString.title;
+            if (queryString.type && queryString.type != '' && ["FREE", "PAID"].indexOf(queryString.type) >= 0) query.eventType = queryString.type;
+            if (queryString.status && queryString.status != '' && ["ACTIVE", "INACTIVE"].indexOf(queryString.status) >= 0) query.status = queryString.status;
 
-            // console.log(query)
-            const eventsCount = await this.eventModel.countDocuments(query)
-                .exec();
+            const keyId = redisKeys.getKey(`events_${pageOptions.page}_${pageOptions.limit}`);
 
-            const events = await this.eventModel.find(query)
-                .sort({
-                    createdAt: -1
-                })
-                .skip(pageOptions.page * pageOptions.limit)
-                .limit(pageOptions.limit * 1)
-                .exec();
+            const fetchEventsFromDb = async () => {
+                const eventsCount = await this.eventModel.countDocuments(query)
+                    .exec();
 
-            return {
-                statusCode: HttpStatus.OK,
-                message: "Events fetched successfully.",
-                data: events,
-                pagination: {
-                    total: eventsCount,
-                    pages: Math.ceil(eventsCount / pageOptions.limit),
-                    page: pageOptions.page,
-                    limit: pageOptions.limit
+                const events = await this.eventModel.find(query)
+                    .sort({
+                        createdAt: -1
+                    })
+                    .skip(pageOptions.page * pageOptions.limit)
+                    .limit(pageOptions.limit * 1)
+                    .exec();
+
+
+                client.set(keyId, JSON.stringify({ total: eventsCount, events }))
+                client.expire(keyId, 60 * 120);
+
+                return {
+                    statusCode: HttpStatus.OK,
+                    message: "Events fetched successfully.",
+                    data: events,
+                    pagination: {
+                        total: eventsCount,
+                        pages: Math.ceil(eventsCount / pageOptions.limit),
+                        page: pageOptions.page,
+                        limit: pageOptions.limit
+                    }
                 }
+            }
+
+
+            // forcing function to return promise
+            const getAsync = promisify(client.get).bind(client);
+            const value = await getAsync(keyId);
+            if(value){
+                if (queryString.title || queryString.type || queryString.status) {
+                    console.log('Fetching all events from db. Query present....')
+                    return fetchEventsFromDb();
+                }
+                
+                let result = JSON.parse(value)
+                console.log('Fetching request from cache ....');
+                return {
+                    statusCode: HttpStatus.OK,
+                    message: "Events fetched successfully.",
+                    data: result.events,
+                    pagination: {
+                        total: result.eventsCount,
+                        pages: Math.ceil(result.eventsCount / pageOptions.limit),
+                        page: pageOptions.page,
+                        limit: pageOptions.limit
+                    }
+                }
+            }else{
+                console.log('Empty cache.Fetching events from db ....');
+                return fetchEventsFromDb();
             }
         }
         catch (error) {
@@ -103,7 +135,7 @@ export class EventService {
 
             if (event !== null) {
 
-                const tickets = await this.ticketModel.findOne({eventId : event._id}).exec();
+                const tickets = await this.ticketModel.findOne({ eventId: event._id }).exec();
 
                 return {
                     statusCode: HttpStatus.OK,
@@ -134,12 +166,12 @@ export class EventService {
             }).exec();
 
             if (event !== null) {
-                const tickets = await this.ticketModel.findOne({eventId : event._id}).exec();
+                const tickets = await this.ticketModel.findOne({ eventId: event._id }).exec();
 
                 return {
                     statusCode: HttpStatus.OK,
                     message: "Event fetched successfully.",
-                    data: {event,tickets}
+                    data: { event, tickets }
                 }
             } else {
                 return {

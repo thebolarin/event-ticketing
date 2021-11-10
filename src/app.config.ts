@@ -24,4 +24,8 @@ export const AppConfigValidationSchema = Joi.object({
 	S3_SECRET_ACCESS_KEY: Joi.string().required(),
 	S3_BUCKET: Joi.string().required(),
 	S3_REGION: Joi.string().required(),
+
+	REDIS_HOST: Joi.string().required(),
+	REDIS_PORT:Joi.number().required(),
+	REDIS_PASSWORD: Joi.string().required(),
 });
