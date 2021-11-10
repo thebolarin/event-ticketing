@@ -1,5 +1,6 @@
 import { Injectable, HttpStatus } from '@nestjs/common';
 import { Ticket } from './interfaces/ticket.interface';
+import { Event } from '../events/interfaces/event.interface';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { CreateTicketDto, UpdateTicketDto } from './dto/ticket.dto';
@@ -7,8 +8,8 @@ import { CreateTicketDto, UpdateTicketDto } from './dto/ticket.dto';
 @Injectable()
 export class TicketService {
     constructor(
-        @InjectModel('Ticket')
-        private readonly ticketModel: Model<Ticket>,
+        @InjectModel('Ticket') private readonly ticketModel: Model<Ticket>,
+        @InjectModel('Event') private readonly eventModel: Model<Event>
     ) { }
 
     async findAll(userInfo: any, queryString) {
@@ -63,6 +64,15 @@ export class TicketService {
 
     async create(userInfo: any, createTicketDto: CreateTicketDto) {
         try {
+            const event =  this.eventModel.findOne({ _id : createTicketDto.eventId }).exec();
+
+            if(!event){
+                return {
+                    statusCode: HttpStatus.BAD_REQUEST,
+                    message: "Event not found"
+                }
+            }
+
             const ticket = new this.ticketModel({
                 title: createTicketDto.title,
                 description: createTicketDto.description,
@@ -74,6 +84,10 @@ export class TicketService {
             });
 
             await ticket.save();
+
+            await this.eventModel.findByIdAndUpdate(createTicketDto.eventId,
+                { "$push": { "tickets": ticket._id } },
+                { "new": true, "upsert": true });
 
             return {
                 statusCode: HttpStatus.CREATED,

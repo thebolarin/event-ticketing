@@ -1,6 +1,9 @@
 import * as mongoose from 'mongoose';
 import {  Schema } from '@nestjs/mongoose';
 import { AppConfig } from "../../app.config";
+import redis from '../../common/configs/redis-client';
+import redisKeys from '../../common/configs/redis-key-gen';
+const client = redis.getClient();
 
  const EventSchema = new mongoose.Schema({
     title: String,
@@ -25,6 +28,7 @@ import { AppConfig } from "../../app.config";
     facebookUrl: String,
     twitterUrl: String,
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    tickets: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Ticket' }],
     createdAt: Date,
     updatedAt: Date,
 }, { toJSON: { virtuals: true } });
@@ -33,7 +37,21 @@ import { AppConfig } from "../../app.config";
 EventSchema.virtual('bannerUrl').get(function () {
     const bucket = AppConfig.S3_BUCKET
     const region = AppConfig.S3_REGION
-    return `https://${bucket}.s3-${region}.amazonaws.com/event/${this.banner}`
+
+    if(this.banner) return `https://${bucket}.s3-${region}.amazonaws.com/event/${this.banner}`
+    return null;
+    
+});
+
+EventSchema.pre('save' , function(next){
+    const keyId = redisKeys.getKey(`events_*`);
+    console.log(`Deleting products from cache....`);
+    client.keys(keyId, function (err, rows) {
+        rows.forEach(row => {
+            client.unlink(row);
+        });
+    })
+    next();
 });
 
 

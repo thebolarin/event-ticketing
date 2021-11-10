@@ -14,40 +14,6 @@ export class UsersService {
 	constructor(@InjectModel('User') private readonly userModel: Model<User>,
                 ) {}
 
-	// async create(userInfo: any, createUserDto: CreateUserDto) {
-	// 	let findUser = await this.userModel.findOne({
-	// 		emailAddress: createUserDto.emailAddress,
-	// 		isDeleted: false
-	// 	}).exec();
-
-	// 	if(findUser === null) {
-	// 		const user = new this.userModel({
-	// 			emailAddress: createUserDto.emailAddress,
-	// 			createdAt: new Date(),
-	// 			updatedAt: new Date()
-	// 		});
-	// 		await user.save();
-			
-	// 		let jwtToken = await jwt.sign({
-	// 			emailAddress: createUserDto.emailAddress,
-	// 			_id: user._id
-	// 		}, AppConfig.APPLICATION_KEY, {
-	// 			expiresIn: "7d"
-	// 		});
-
-	// 		return {
-	// 			statusCode: HttpStatus.OK,
-	// 			message: "User created successfully.",
-	// 			data: user
-	// 		}
-	// 	}else {
-	// 		return {
-	// 			statusCode: HttpStatus.BAD_REQUEST,
-	// 			message: "User email already exist."
-	// 		}
-	// 	}
-	// }
-
 	async getAll(userInfo: any) {
 		try{
 			const users = await this.userModel.find({}).exec();

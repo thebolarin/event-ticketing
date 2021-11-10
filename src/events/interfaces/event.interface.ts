@@ -13,6 +13,7 @@ export interface Event extends Document {
     status: String,
     date: Date,
     startTime: String, 
+    tickets: Array<ObjectId>,
     endTime: String,
 	instagramUrl: String,
     facebookUrl: String,

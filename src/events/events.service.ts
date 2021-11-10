@@ -42,7 +42,7 @@ export class EventService {
                 const eventsCount = await this.eventModel.countDocuments(query)
                     .exec();
 
-                const events = await this.eventModel.find(query)
+                const events = await this.eventModel.find(query).populate('tickets')
                     .sort({
                         createdAt: -1
                     })
@@ -68,9 +68,9 @@ export class EventService {
             }
 
 
-            // forcing function to return promise
             const getAsync = promisify(client.get).bind(client);
             const value = await getAsync(keyId);
+
             if(value){
                 if (queryString.title || queryString.type || queryString.status) {
                     console.log('Fetching all events from db. Query present....')
@@ -108,7 +108,7 @@ export class EventService {
         try {
             const events = await this.eventModel.find({
                 createdBy: userInfo._id
-            }).exec();
+            }).populate('tickets').exec();
 
             return {
                 statusCode: HttpStatus.OK,
@@ -130,16 +130,15 @@ export class EventService {
         try {
             const event = await this.eventModel.findOne({
                 _id: eventId,
-            }).exec();
+            }).populate('tickets').exec();
+            
 
             if (event !== null) {
-
-                const tickets = await this.ticketModel.findOne({ eventId: event._id }).exec();
-
+                
                 return {
                     statusCode: HttpStatus.OK,
                     message: "Event fetched successfully.",
-                    data: { event, tickets }
+                    data:  event
                 }
             } else {
                 return {
@@ -161,7 +160,7 @@ export class EventService {
         try {
             const event = await this.eventModel.findOne({
                 identifier: eventIdentifier
-            }).exec();
+            }).populate('tickets').exec();
 
             if (event !== null) {
                 const tickets = await this.ticketModel.findOne({ eventId: event._id }).exec();
@@ -320,7 +319,7 @@ export class EventService {
 
             if (event !== null) {
                 event.status = updateEventStatusDto.status,
-                    event.updatedAt = new Date();
+                event.updatedAt = new Date();
                 await event.save();
 
                 return {
@@ -353,7 +352,7 @@ export class EventService {
 
             if (event !== null) {
                 event.eventType = updateEventTypeDto.eventType,
-                    event.updatedAt = new Date();
+                event.updatedAt = new Date();
                 await event.save();
 
                 return {

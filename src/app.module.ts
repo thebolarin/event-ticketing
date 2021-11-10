@@ -63,6 +63,7 @@ export class AppModule {
 	configure(consumer: MiddlewareConsumer) {
 		consumer.apply(AuthMiddleware).forRoutes(
 			// EventsController,
+			UsersController,
 			{ path: '/event/me', method: RequestMethod.GET },
 			{ path: '/event', method: RequestMethod.POST },
 			{ path: '/event/:eventId', method: RequestMethod.PUT },
