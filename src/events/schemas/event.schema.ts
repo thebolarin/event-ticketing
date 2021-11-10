@@ -1,7 +1,6 @@
 import * as mongoose from 'mongoose';
 import {  Schema } from '@nestjs/mongoose';
-
-// @Schema({autoIndex: true, toJSON: {virtuals: true}})
+import { AppConfig } from "../../app.config";
 
  const EventSchema = new mongoose.Schema({
     title: String,
@@ -32,9 +31,8 @@ import {  Schema } from '@nestjs/mongoose';
 
 
 EventSchema.virtual('bannerUrl').get(function () {
-    console.log('hi')
-    const bucket = 'odutusinbucket'
-    const region = 'eu-west-1'
+    const bucket = AppConfig.S3_BUCKET
+    const region = AppConfig.S3_REGION
     return `https://${bucket}.s3-${region}.amazonaws.com/event/${this.banner}`
 });
 

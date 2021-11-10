@@ -96,7 +96,6 @@ export class EventService {
             }
         }
         catch (error) {
-            console.log(error)
             return {
                 statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
                 message: "Invalid Request"
@@ -150,7 +149,6 @@ export class EventService {
             }
         }
         catch (error) {
-            console.log(error)
             return {
                 statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
                 message: "Invalid Request"
