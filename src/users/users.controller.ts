@@ -6,16 +6,6 @@ import { ChangePasswordDto, CreateUserDto, GetUserDto, UpdateUserDto } from './d
 export class UsersController {
 	constructor(private usersService: UsersService) {}	
 
-	// @Get('me')
-	// async me(@Request() request) {
-	// 	return await this.usersService.me(request.decoded);
-	// }
-
-	@Put('change-password')
-	async changePassword(@Request() request, @Body() changePasswordDto: ChangePasswordDto) {
-		return await this.usersService.changePassword(request.decoded, changePasswordDto);
-	}
-
 	@Get()
 	async getAll(@Request() request) {
 		return await this.usersService.getAll(request.decoded);
@@ -30,6 +20,11 @@ export class UsersController {
 	@UsePipes(new ValidationPipe({ transform: true }))
 	async update(@Request() request, @Param() params: GetUserDto, @Body() updateUserDto: UpdateUserDto) {
 		return await this.usersService.update(params.userId, updateUserDto);
+	}
+
+	@Post('change-password')
+	async changePassword(@Request() request, @Body() changePasswordDto: ChangePasswordDto) {
+		return await this.usersService.changePassword(request.decoded, changePasswordDto);
 	}
 
 	@Delete(':userId')
