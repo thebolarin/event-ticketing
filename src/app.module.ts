@@ -48,7 +48,8 @@ import { S3Service } from './common/services/s3.service';
 	controllers: [
 		AppController,
 		EventsController,
-		TicketsController
+		TicketsController,
+		UsersController
 	],
 	providers: [		
 		AppService,

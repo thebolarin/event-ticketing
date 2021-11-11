@@ -48,11 +48,11 @@ export class CreateEventDto {
 
 	@IsString()
 	@IsNotEmpty()
-	readonly startTime: string;
+	readonly startTime: Date;
 
 	@IsString()
 	@IsNotEmpty()
-	readonly endTime: string;
+	readonly endTime: Date;
 
 	@IsString()
 	@IsNotEmpty()

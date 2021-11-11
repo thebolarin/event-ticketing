@@ -13,6 +13,20 @@ export class AuthMiddleware implements NestMiddleware {
 		// check header or url parameters or post parameters for token
 		let token = req.headers['Authorization'] || req.headers['authorization'];
 
+
+		if(AppConfig.NODE_ENV == 'test'){
+			return req.decoded = {
+				"_id": "61899841ceb97060210bae6e",
+				"firstName": "abs",
+				"lastName": "tester",
+				"emailAddress": "abc@testing.com",
+				"phoneNumber": "000000000000",
+				"createdAt": "2021-11-08T21:36:01.265Z",
+				"updatedAt": "2021-11-08T21:36:01.265Z",
+				"__v": 0
+			}
+		}
+
 		if(token) {
 			token = req.headers.authorization.split(' ')[1];
 
