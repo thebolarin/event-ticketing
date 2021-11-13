@@ -35,6 +35,7 @@ export class EventService {
             if (queryString.title && queryString.title != '') query.title = queryString.title;
             if (queryString.type && queryString.type != '' && ["FREE", "PAID"].indexOf(queryString.type) >= 0) query.eventType = queryString.type;
             if (queryString.status && queryString.status != '' && ["ACTIVE", "INACTIVE"].indexOf(queryString.status) >= 0) query.status = queryString.status;
+            if (queryString.creatorId && queryString.creatorId != '') query.createdBy = queryString.creatorId;
 
             const keyId = redisKeys.getKey(`events_${pageOptions.page}_${pageOptions.limit}`);
 
@@ -280,8 +281,8 @@ export class EventService {
                 event.latitude = updateEventDto.latitude;
                 event.banner = updateEventDto.banner;
                 event.eventType = updateEventDto.eventType,
-                    event.status = updateEventDto.status,
-                    event.date = updateEventDto.date;
+                event.status = updateEventDto.status,
+                event.date = updateEventDto.date;
                 event.startTime = updateEventDto.startTime;
                 event.endTime = updateEventDto.endTime;
                 event.instagramUrl = updateEventDto.instagramUrl;

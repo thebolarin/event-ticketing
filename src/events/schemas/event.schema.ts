@@ -43,7 +43,17 @@ EventSchema.virtual('bannerUrl').get(function () {
     
 });
 
-EventSchema.pre('save' , function(next){
+EventSchema.post('save' , async function(){
+    await clearCache()
+});
+
+EventSchema.post('remove' , async function(){
+    await clearCache()
+});
+
+
+
+const clearCache = () => {
     const keyId = redisKeys.getKey(`events_*`);
     console.log(`Deleting products from cache....`);
     client.keys(keyId, function (err, rows) {
@@ -51,8 +61,7 @@ EventSchema.pre('save' , function(next){
             client.unlink(row);
         });
     })
-    next();
-});
+};
 
 
 export { EventSchema };

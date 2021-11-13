@@ -59,6 +59,49 @@ export class UsersService {
 		
 	}
 
+	async create(createUserDto: CreateUserDto) {
+		try {
+			let findUser = await this.userModel.findOne({
+				emailAddress: createUserDto.emailAddress,
+			}).exec();
+
+			if (findUser === null) {
+				const hashedPassword = await bcrypt.hash("" + createUserDto.password, 10);
+				const userData = {
+					firstName: createUserDto.firstName,
+					lastName: createUserDto.lastName,
+					emailAddress: createUserDto.emailAddress,
+					phoneNumber: createUserDto.phoneNumber,
+					password: hashedPassword,
+					createdAt: new Date(),
+					updatedAt: new Date()
+				}
+
+				const user = new this.userModel(userData);
+
+				await user.save();
+
+				return {
+					statusCode: HttpStatus.CREATED,
+					message: "User Created Successful.",
+					data: user
+				}
+
+			} else {
+				return {
+					statusCode: HttpStatus.BAD_REQUEST,
+					message: "User not found."
+				}
+			}
+		} catch (err) {
+			return {
+				statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+				message: "Invalid Request"
+			}
+		}
+
+	}
+
 	async update(userId: String, updateUserDto: UpdateUserDto) {
 		try{
 			let user = await this.userModel.findOne({

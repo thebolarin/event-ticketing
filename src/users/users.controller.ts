@@ -10,6 +10,7 @@ export class UsersController {
 	async getAll(@Request() request) {
 		return await this.usersService.getAll(request.decoded);
 	}
+	
 
 	@Get(':userId')
 	async get(@Request() request, @Param() params: GetUserDto) {

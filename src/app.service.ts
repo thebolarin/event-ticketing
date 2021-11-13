@@ -44,13 +44,6 @@ export class AppService {
 
         await user.save();
 
-        // let jwtToken = await jwt.sign({
-        //   emailAddress: registrationDto.emailAddress,
-        //   _id: user._id
-        // }, AppConfig.APPLICATION_KEY, {
-        //   expiresIn: "7d"
-        // });
-
         return {
           statusCode: HttpStatus.CREATED,
           message: "Registration Successful."
