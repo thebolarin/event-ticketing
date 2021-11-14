@@ -65,13 +65,16 @@ export class AppModule {
 		consumer.apply(AuthMiddleware).forRoutes(
 			// EventsController,
 			UsersController,
-			TicketsController,
 			{ path: '/event/me', method: RequestMethod.GET },
 			{ path: '/event', method: RequestMethod.POST },
 			{ path: '/event/:eventId', method: RequestMethod.PUT },
 			{ path: '/event/:eventId/status', method: RequestMethod.PUT },
 			{ path: '/event/:eventId/type', method: RequestMethod.PUT },
 			{ path: '/event/:eventId', method: RequestMethod.DELETE },
+
+			{ path: '/ticket', method: RequestMethod.POST },
+			{ path: '/ticket/:ticketId', method: RequestMethod.PUT },
+			{ path: '/ticket/:ticketId', method: RequestMethod.DELETE },
 		);
 	}
 }
